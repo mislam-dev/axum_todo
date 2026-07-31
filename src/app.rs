@@ -5,6 +5,7 @@ use axum::{Router, routing::get};
 use sea_orm::DatabaseConnection;
 
 use crate::database::database::connect_db;
+use crate::modules::category::router::category_router;
 use crate::modules::docs::docs_router;
 use crate::modules::todo::router::todo_router;
 
@@ -23,6 +24,7 @@ pub async fn app() -> Router {
     let router = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .nest("/api/todos", todo_router())
+        .nest("/api/categories", category_router())
         .layer(Extension(state))
         .merge(docs_router());
 

@@ -20,3 +20,4 @@ sea-orm = {
 serde = { version = "1.0.229", features = ["derive"] }
 tokio = { version = "1.53.1", features = ["full"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
+uuid = { version = "1.24.0", features = ["v4", "serde"] }
