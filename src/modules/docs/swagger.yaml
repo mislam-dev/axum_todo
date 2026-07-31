@@ -4,7 +4,7 @@ info:
   description: API documentation for the Loco-based Todo Application
   version: 1.0.0
 servers:
-  - url: http://localhost:5150
+  - url: http://localhost:3000
     description: Local development server
 paths:
   /api/todos:
