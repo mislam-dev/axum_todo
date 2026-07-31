@@ -3,7 +3,20 @@ name = "axum_todo"
 version = "0.1.0"
 edition = "2024"
 
+[workspace]
+members = [
+  ".",
+  "migration",
+]
+
 [dependencies]
 axum = "0.8.9"
+dotenvy = "0.15.7"
+migration = { path = "migration" }
+sea-orm = {
+  version = "2.0.0",
+  features = ["macros", "runtime-tokio-rustls", "sqlx-postgres"]
+}
+serde = { version = "1.0.229", features = ["derive"] }
 tokio = { version = "1.53.1", features = ["full"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
