@@ -2,7 +2,7 @@ use super::entities::users::{ActiveModel as UsersActiveModel, Entity as UsersEnt
 
 use crate::{
     app::AppState,
-    error::AppError,
+    core::errors::error::AppError,
     modules::user::dto::{IdParam, UserCreateDto, UserItemResponse, UserUpdateDto},
 };
 use axum::{Extension, Json, extract::Path};

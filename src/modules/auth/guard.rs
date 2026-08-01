@@ -1,4 +1,4 @@
-use crate::error::AppError;
+use crate::core::errors::error::AppError;
 
 use super::jwt::{Claims, verify_jwt};
 use axum::http::header::AUTHORIZATION;

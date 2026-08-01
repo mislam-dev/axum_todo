@@ -1,4 +1,5 @@
-use crate::error::AppError;
+use crate::core::errors::error::AppError;
+use crate::core::validation::validation::JsonValidate;
 use crate::modules::auth::jwt::{JwtPaylaod, create_jwt};
 use crate::modules::user::dto::UserCreateDto;
 use crate::modules::user::entities::users::{
@@ -16,7 +17,7 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 
 pub async fn login(
     Extension(state): Extension<AppState>,
-    Json(payload): Json<LoginUserDto>,
+    JsonValidate(payload): JsonValidate<LoginUserDto>,
 ) -> Result<Json<LoginResponse>, AppError> {
     let find_user = UserEntity::find()
         .filter(UserColumn::Email.eq(payload.email))
@@ -53,7 +54,7 @@ pub async fn login(
 
 pub async fn register(
     Extension(state): Extension<AppState>,
-    Json(payload): Json<UserCreateDto>,
+    JsonValidate(payload): JsonValidate<UserCreateDto>,
 ) -> Result<(), AppError> {
     let find_user = UserEntity::find()
         .filter(UserColumn::Email.eq(&payload.email))

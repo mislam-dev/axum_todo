@@ -1,6 +1,6 @@
 mod app;
+mod core;
 mod database;
-mod error;
 mod modules;
 
 use app::app;
