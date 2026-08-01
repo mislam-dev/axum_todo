@@ -2,7 +2,7 @@ mod controller;
 mod dto;
 mod entity;
 mod guard;
-mod jwt;
+pub mod jwt;
 mod model;
 mod repository;
 pub mod router;

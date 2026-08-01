@@ -1,13 +1,23 @@
-use super::entities::todos::{ActiveModel as TodosActiveModel, Entity as TodosEntity};
+use super::entities::todos::{
+    ActiveModel as TodosActiveModel, Column as TodosColumn, Entity as TodosEntity,
+};
 use crate::app::AppState;
+use crate::modules::auth::jwt::Claims;
 use crate::modules::todo::dto::{IdParam, TodoCreateDto, TodoItemResponse, TodoUpdateDto};
 use axum::{Extension, Json, extract::Path, http::StatusCode};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, EntityTrait};
+use sea_orm::{ColumnTrait, Condition, QueryFilter};
 
 pub async fn list(
+    claims: Claims,
     Extension(state): Extension<AppState>,
 ) -> Result<Json<Vec<TodoItemResponse>>, StatusCode> {
-    let todos = TodosEntity::find().all(&state.db).await.unwrap();
+    let condition = Condition::all().add(TodosColumn::UserId.eq(claims.sub));
+    let todos = TodosEntity::find()
+        .filter(condition)
+        .all(&state.db)
+        .await
+        .unwrap();
 
     let response = todos
         .into_iter()
@@ -22,10 +32,16 @@ pub async fn list(
 }
 
 pub async fn show(
+    claims: Claims,
     Extension(state): Extension<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<Json<TodoItemResponse>, StatusCode> {
-    let todo = TodosEntity::find_by_id(id.0).one(&state.db).await.unwrap();
+    let condition = Condition::all().add(TodosColumn::UserId.eq(claims.sub));
+    let todo = TodosEntity::find_by_id(id.0)
+        .filter(condition)
+        .one(&state.db)
+        .await
+        .unwrap();
 
     if todo.is_none() {
         return Err(StatusCode::NOT_FOUND);
@@ -42,6 +58,7 @@ pub async fn show(
 }
 
 pub async fn add(
+    claims: Claims,
     Extension(state): Extension<AppState>,
     Json(payload): Json<TodoCreateDto>,
 ) -> Result<Json<TodoItemResponse>, StatusCode> {
@@ -51,6 +68,7 @@ pub async fn add(
             Some(completed) => Set(completed),
             None => Set(false),
         },
+        user_id: Set(claims.sub),
         ..Default::default()
     };
     let inserted_todo = new_todo.insert(&state.db).await.unwrap();
@@ -64,11 +82,14 @@ pub async fn add(
 }
 
 pub async fn update(
+    claims: Claims,
     Extension(state): Extension<AppState>,
     Path(id): Path<IdParam>,
     Json(payload): Json<TodoUpdateDto>,
 ) -> Result<Json<TodoItemResponse>, StatusCode> {
+    let condition = Condition::all().add(TodosColumn::UserId.eq(claims.sub));
     let existing_tood = TodosEntity::find_by_id(id.0)
+        .filter(condition)
         .one(&state.db)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)? // Best practice instead of .unwrap
@@ -98,10 +119,13 @@ pub async fn update(
 }
 
 pub async fn remove(
+    claims: Claims,
     Extension(state): Extension<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<(), StatusCode> {
+    let condition = Condition::all().add(TodosColumn::UserId.eq(claims.sub));
     let delete_result = TodosEntity::delete_by_id(id.0)
+        .filter(condition)
         .exec(&state.db)
         .await
         .unwrap();

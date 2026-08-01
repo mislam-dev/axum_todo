@@ -1,6 +1,4 @@
-use super::entities::category::{
-    ActiveModel as CategoryActiveModel, Entity as CategoryEntity, Model as CategoryModel,
-};
+use super::entities::category::{ActiveModel as CategoryActiveModel, Entity as CategoryEntity};
 
 use crate::{
     app::AppState,
@@ -8,7 +6,6 @@ use crate::{
 };
 use axum::{Extension, Json, extract::Path, http::StatusCode};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, EntityTrait};
-use uuid::Uuid;
 
 pub async fn list(
     Extension(state): Extension<AppState>,

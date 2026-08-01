@@ -1,3 +1,4 @@
+use crate::error::AppError;
 use crate::modules::auth::jwt::{JwtPaylaod, create_jwt};
 use crate::modules::user::dto::UserCreateDto;
 use crate::modules::user::entities::users::{
@@ -8,22 +9,24 @@ use crate::{
     app::AppState,
     modules::auth::dto::{LoginResponse, LoginUserDto},
 };
+use axum::Extension;
 use axum::Json;
-use axum::{Extension, http::StatusCode};
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 
 pub async fn login(
     Extension(state): Extension<AppState>,
     Json(payload): Json<LoginUserDto>,
-) -> Result<Json<LoginResponse>, StatusCode> {
+) -> Result<Json<LoginResponse>, AppError> {
     let find_user = UserEntity::find()
         .filter(UserColumn::Email.eq(payload.email))
         .one(&state.db)
         .await
         .unwrap();
     if find_user.is_none() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(AppError::BadRequest(
+            "Invalid Login credenditals".to_string(),
+        ));
     }
 
     let find_user = find_user.unwrap();
@@ -31,12 +34,14 @@ pub async fn login(
     let verify = verify_passwrod(&find_user.password, &payload.password).await;
 
     if !verify {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(AppError::BadRequest(
+            "Invalid Login credenditals".to_string(),
+        ));
     }
 
     let access_token = create_jwt(JwtPaylaod {
         email: find_user.email,
-        sub: find_user.id.to_string(),
+        sub: find_user.id,
     })
     .unwrap();
 
@@ -49,7 +54,7 @@ pub async fn login(
 pub async fn register(
     Extension(state): Extension<AppState>,
     Json(payload): Json<UserCreateDto>,
-) -> Result<(), StatusCode> {
+) -> Result<(), AppError> {
     let find_user = UserEntity::find()
         .filter(UserColumn::Email.eq(&payload.email))
         .one(&state.db)
@@ -57,7 +62,7 @@ pub async fn register(
         .unwrap();
 
     if !find_user.is_none() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(AppError::BadRequest("User already exists".to_string()));
     }
     let hash_password = hash_password(&payload.password).await;
     let active_user = UserActiveModel {

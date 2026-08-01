@@ -1,6 +1,4 @@
-use sea_orm_migration::{
-    prelude::*, schema::*, sea_query::value::prelude::serde_json::ser::CharEscape::Tab,
-};
+use sea_orm_migration::{prelude::*, schema::*};
 
 pub struct Migration;
 

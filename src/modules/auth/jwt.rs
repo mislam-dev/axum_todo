@@ -1,19 +1,20 @@
 use jsonwebtoken::Header;
 use migration::prelude::chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 const SECRET: &[u8] = b"your-super-secret-jwt-key"; // In prod, load from std::env
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
-    pub sub: String,
+    pub sub: Uuid,
     pub exp: usize,
     pub iat: usize,
     pub email: String,
 }
 
 pub struct JwtPaylaod {
-    pub sub: String,
+    pub sub: Uuid,
     pub email: String,
 }
 
@@ -22,7 +23,7 @@ pub fn create_jwt(data: JwtPaylaod) -> Result<String, jsonwebtoken::errors::Erro
     let exp: usize = (now + Duration::hours(24)).timestamp() as usize;
     let iat = now.timestamp() as usize;
     let claims = Claims {
-        sub: data.sub.to_owned(),
+        sub: data.sub,
         exp,
         iat,
         email: data.email.to_owned(),
