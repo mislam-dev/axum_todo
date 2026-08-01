@@ -11,7 +11,9 @@ members = [
 
 [dependencies]
 axum = "0.8.9"
+bcrypt = "0.19.3"
 dotenvy = "0.15.7"
+jsonwebtoken = "11.0.0"
 migration = { path = "migration" }
 sea-orm = {
   version = "2.0.0",
