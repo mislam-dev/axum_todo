@@ -61,6 +61,7 @@ pub async fn register(
     }
     let hash_password = hash_password(&payload.password).await;
     let active_user = UserActiveModel {
+        name: Set(payload.name),
         email: Set(payload.email),
         password: Set(hash_password),
         ..Default::default()
