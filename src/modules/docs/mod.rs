@@ -5,7 +5,9 @@ mod controller;
 use controller::serve_openapi_specs;
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
-pub fn docs_router() -> Router {
+use crate::app::AppState;
+
+pub fn docs_router() -> Router<AppState> {
     let swagger_config = Config::from("/api-docs/openapi.yaml");
     let swagger_ui = SwaggerUi::new("/swag").config(swagger_config);
 

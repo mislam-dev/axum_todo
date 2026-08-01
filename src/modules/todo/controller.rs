@@ -3,11 +3,12 @@ use crate::core::errors::error::AppError;
 use crate::modules::auth::jwt::Claims;
 use crate::modules::todo::dto::{IdParam, TodoCreateDto, TodoItemResponse, TodoUpdateDto};
 use crate::modules::todo::service::TodosService;
-use axum::{Extension, Json, extract::Path};
+use axum::extract::State;
+use axum::{Json, extract::Path};
 
 pub async fn list(
     claims: Claims,
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<TodoItemResponse>>, AppError> {
     let response = TodosService::find(&state.db, claims.sub).await?;
     Ok(Json(response))
@@ -15,7 +16,7 @@ pub async fn list(
 
 pub async fn show(
     claims: Claims,
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<Json<TodoItemResponse>, AppError> {
     let response = TodosService::find_one(&state.db, claims.sub, id.0).await?;
@@ -24,7 +25,7 @@ pub async fn show(
 
 pub async fn add(
     claims: Claims,
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Json(payload): Json<TodoCreateDto>,
 ) -> Result<Json<TodoItemResponse>, AppError> {
     let todo = TodosService::create(&state.db, claims.sub, payload).await?;
@@ -33,7 +34,7 @@ pub async fn add(
 
 pub async fn update(
     claims: Claims,
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<IdParam>,
     Json(payload): Json<TodoUpdateDto>,
 ) -> Result<Json<TodoItemResponse>, AppError> {
@@ -44,7 +45,7 @@ pub async fn update(
 
 pub async fn remove(
     claims: Claims,
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<(), AppError> {
     TodosService::remove(&state.db, id.0, claims.sub).await?;

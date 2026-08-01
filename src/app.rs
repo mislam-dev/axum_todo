@@ -1,6 +1,5 @@
 use std::env;
 
-use axum::Extension;
 use axum::{Router, routing::get};
 use sea_orm::DatabaseConnection;
 
@@ -29,8 +28,8 @@ pub async fn app() -> Router {
         .nest("/api/users", user_router())
         .nest("/api/todos", todo_router())
         .nest("/api/categories", category_router())
-        .layer(Extension(state))
-        .merge(docs_router());
+        .merge(docs_router())
+        .with_state(state);
 
     router
 }

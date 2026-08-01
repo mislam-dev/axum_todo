@@ -10,13 +10,14 @@ use crate::{
     app::AppState,
     modules::auth::dto::{LoginResponse, LoginUserDto},
 };
-use axum::Extension;
+
 use axum::Json;
+use axum::extract::State;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 
 pub async fn login(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     JsonValidate(payload): JsonValidate<LoginUserDto>,
 ) -> Result<Json<LoginResponse>, AppError> {
     let find_user = UserEntity::find()
@@ -53,7 +54,7 @@ pub async fn login(
 }
 
 pub async fn register(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     JsonValidate(payload): JsonValidate<UserCreateDto>,
 ) -> Result<(), AppError> {
     let find_user = UserEntity::find()

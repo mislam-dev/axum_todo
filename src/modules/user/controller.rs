@@ -6,17 +6,18 @@ use crate::{
         service::UserService,
     },
 };
-use axum::{Extension, Json, extract::Path};
+use axum::{
+    Json,
+    extract::{Path, State},
+};
 
-pub async fn list(
-    Extension(state): Extension<AppState>,
-) -> Result<Json<Vec<UserItemResponse>>, AppError> {
+pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<UserItemResponse>>, AppError> {
     let users = UserService::find(&state.db).await?;
     Ok(Json(users))
 }
 
 pub async fn show(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<Json<UserItemResponse>, AppError> {
     let user = UserService::find_one(&state.db, id.0).await?;
@@ -24,7 +25,7 @@ pub async fn show(
 }
 
 pub async fn add(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Json(payload): Json<UserCreateDto>,
 ) -> Result<Json<UserItemResponse>, AppError> {
     let user = UserService::create(&state.db, payload).await?;
@@ -32,7 +33,7 @@ pub async fn add(
 }
 
 pub async fn update(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<IdParam>,
     Json(payload): Json<UserUpdateDto>,
 ) -> Result<Json<UserItemResponse>, AppError> {
@@ -41,7 +42,7 @@ pub async fn update(
 }
 
 pub async fn remove(
-    Extension(state): Extension<AppState>,
+    State(state): State<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<(), AppError> {
     let _ = UserService::remove(&state.db, id.0).await?;

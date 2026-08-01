@@ -3,9 +3,12 @@ use axum::{
     routing::{delete, get, patch, post},
 };
 
-use crate::modules::category::controller::{add, list, remove, show, update};
+use crate::{
+    app::AppState,
+    modules::category::controller::{add, list, remove, show, update},
+};
 
-pub fn category_router() -> Router {
+pub fn category_router() -> Router<AppState> {
     Router::new()
         .route("/", get(list))
         .route("/{id}", get(show))
