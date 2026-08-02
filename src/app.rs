@@ -18,7 +18,9 @@ pub struct AppState {
 pub async fn app() -> Router {
     let db_url = env::var("DATABASE_URL").expect("Database url must set");
 
-    let db = connect_db(&db_url).await;
+    let db = connect_db(&db_url)
+        .await
+        .expect("Fatal Error: Could not establish database connection.");
 
     let state = AppState { db };
 

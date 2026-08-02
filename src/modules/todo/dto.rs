@@ -1,14 +1,16 @@
 use super::entities::todos::Model as TodoModel;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 // Request DTOs
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Validate)]
 pub struct TodoCreateDto {
+    #[validate(length(min = 1, message = "title is required!"))]
     pub title: String,
     pub completed: Option<bool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Validate)]
 pub struct TodoUpdateDto {
     pub title: Option<String>,
     pub completed: Option<bool>,

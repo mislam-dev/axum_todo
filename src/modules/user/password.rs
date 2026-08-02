@@ -1,18 +1,22 @@
-use axum::http::StatusCode;
+use crate::core::errors::error::AppError;
 use bcrypt::{DEFAULT_COST, hash, verify};
-pub async fn hash_password(password: &str) -> String {
-    hash(password, DEFAULT_COST)
-        .map_err(|err| {
-            eprintln!("Failed to hash password: {}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })
-        .unwrap()
+
+pub async fn hash_password(password: &str) -> Result<String, AppError> {
+    let password_owned = password.to_owned();
+    tokio::task::spawn_blocking(move || {
+        hash(password_owned, DEFAULT_COST)
+            .map_err(|e| AppError::InternalServerError(format!("Password hashing failed: {}", e)))
+    })
+    .await
+    .map_err(|_| AppError::InternalServerError("Failed to execute background task".to_string()))?
 }
-pub async fn verify_passwrod(hash: &str, password: &str) -> bool {
-    verify(password, hash)
-        .map_err(|err| {
-            eprintln!("Failed to verify password: {}", err);
-            false
-        })
-        .unwrap_or(false)
+pub async fn verify_passwrod(hash: &str, password: &str) -> Result<bool, AppError> {
+    let has_owned = hash.to_owned();
+    let password_owned = password.to_owned();
+    tokio::task::spawn_blocking(move || {
+        verify(password_owned, &has_owned)
+            .map_err(|_| AppError::Unauthorized(format!("Unauthorized")))
+    })
+    .await
+    .map_err(|_| AppError::InternalServerError("Failed to execute background task".to_string()))?
 }

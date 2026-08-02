@@ -3,7 +3,7 @@ use migration::prelude::chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-const SECRET: &[u8] = b"your-super-secret-jwt-key"; // In prod, load from std::env
+use crate::core::errors::error::AppError;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
@@ -18,7 +18,10 @@ pub struct JwtPaylaod {
     pub email: String,
 }
 
-pub fn create_jwt(data: JwtPaylaod) -> Result<String, jsonwebtoken::errors::Error> {
+pub fn create_jwt(data: JwtPaylaod) -> Result<String, AppError> {
+    let secret = std::env::var("JWT_SECRET")
+        .map_err(|_| AppError::Config("JWT_SECRET must be set in .env".to_string()))?;
+
     let now = Utc::now();
     let exp: usize = (now + Duration::hours(24)).timestamp() as usize;
     let iat = now.timestamp() as usize;
@@ -31,16 +34,21 @@ pub fn create_jwt(data: JwtPaylaod) -> Result<String, jsonwebtoken::errors::Erro
     jsonwebtoken::encode(
         &Header::default(),
         &claims,
-        &jsonwebtoken::EncodingKey::from_secret(SECRET),
+        &jsonwebtoken::EncodingKey::from_secret(secret.as_bytes()),
     )
+    .map_err(|err| AppError::Config(format!("JWT encoding failed: {}", err)))
 }
 
-pub fn verify_jwt(token: &str) -> Result<Claims, jsonwebtoken::errors::Error> {
+pub fn verify_jwt(token: &str) -> Result<Claims, AppError> {
+    let secret = std::env::var("JWT_SECRET")
+        .map_err(|_| AppError::Config("JWT_SECRET must be set in .env".to_string()))?;
+
     let token_data = jsonwebtoken::decode(
         token,
-        &jsonwebtoken::DecodingKey::from_secret(SECRET),
+        &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
         &jsonwebtoken::Validation::default(),
-    )?;
+    )
+    .map_err(|err| AppError::Config(format!("JWT encoding failed: {}", err)))?;
 
     Ok(token_data.claims)
 }

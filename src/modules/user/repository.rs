@@ -1,8 +1,13 @@
 use crate::{
     core::errors::error::AppError,
-    modules::user::dto::{UserCreateDto, UserUpdateDto},
+    modules::user::{
+        dto::{UserCreateDto, UserUpdateDto},
+        password::hash_password,
+    },
 };
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, DeleteResult, EntityTrait};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue::Set, Condition, DeleteResult, EntityTrait, QueryFilter,
+};
 
 use super::entities::users::{
     ActiveModel as UsersActiveModel, Entity as UsersEntity, Model as UserModel,
@@ -20,7 +25,7 @@ impl UserRepository {
             .map_err(AppError::Database)
     }
 
-    pub async fn find_one(
+    pub async fn find_by_id(
         db: &DatabaseConnection,
         id: Uuid,
     ) -> Result<Option<UserModel>, AppError> {
@@ -32,12 +37,13 @@ impl UserRepository {
 
     pub async fn create(
         db: &DatabaseConnection,
-        user_data: UserCreateDto,
+        dto: UserCreateDto,
     ) -> Result<UserModel, AppError> {
+        let hash_p = hash_password(&dto.password).await?;
         let new_user = UsersActiveModel {
-            name: Set(user_data.name),
-            email: Set(user_data.email),
-            password: Set(user_data.password),
+            name: Set(dto.name),
+            email: Set(dto.email),
+            password: Set(hash_p),
             ..Default::default()
         };
         new_user.insert(db).await.map_err(AppError::Database)
@@ -48,7 +54,7 @@ impl UserRepository {
         id: Uuid,
         user_data: UserUpdateDto,
     ) -> Result<UserModel, AppError> {
-        let existing_user = Self::find_one(db, id)
+        let existing_user = Self::find_by_id(db, id)
             .await?
             .ok_or(AppError::NotFound("User not found!".to_string()))?;
 
@@ -64,6 +70,17 @@ impl UserRepository {
     pub async fn remove(db: &DatabaseConnection, id: Uuid) -> Result<DeleteResult, AppError> {
         UsersEntity::delete_by_id(id)
             .exec(db)
+            .await
+            .map_err(AppError::Database)
+    }
+
+    pub async fn find_one(
+        db: &DatabaseConnection,
+        filter: Condition,
+    ) -> Result<Option<UserModel>, AppError> {
+        UsersEntity::find()
+            .filter(filter)
+            .one(db)
             .await
             .map_err(AppError::Database)
     }

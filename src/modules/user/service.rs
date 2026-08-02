@@ -1,12 +1,11 @@
-use crate::{
-    core::errors::error::AppError,
-    modules::user::{
-        dto::{UserCreateDto, UserItemResponse, UserUpdateDto},
-        repository::UserRepository,
-    },
+use super::entities::users::Column as UserColumn;
+use super::{
+    dto::{UserCreateDto, UserItemResponse, UserItemWithPassword, UserUpdateDto},
+    repository::UserRepository,
 };
+use crate::core::errors::error::AppError;
+use sea_orm::{ColumnTrait, Condition, DatabaseConnection};
 
-use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
 pub struct UserService;
@@ -25,7 +24,7 @@ impl UserService {
         Ok(users_data)
     }
     pub async fn find_one(db: &DatabaseConnection, id: Uuid) -> Result<UserItemResponse, AppError> {
-        let user = UserRepository::find_one(db, id).await?;
+        let user = UserRepository::find_by_id(db, id).await?;
 
         let user = user.ok_or(AppError::NotFound("User not found".to_string()))?;
 
@@ -64,5 +63,20 @@ impl UserService {
         let _ = UserRepository::remove(db, id).await?;
 
         Ok(())
+    }
+
+    pub async fn find_by_email_with_password(
+        db: &DatabaseConnection,
+        email: &String,
+    ) -> Result<UserItemWithPassword, AppError> {
+        let filter = Condition::all().add(UserColumn::Email.eq(email));
+        let user = UserRepository::find_one(db, filter).await?;
+        let user = user.ok_or(AppError::NotFound("User not found".to_string()))?;
+        Ok(UserItemWithPassword {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            password: user.password,
+        })
     }
 }

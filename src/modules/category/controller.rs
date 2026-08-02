@@ -1,3 +1,4 @@
+use crate::core::validation::validation::JsonValidate;
 use crate::{app::AppState, core::errors::error::AppError};
 
 use super::dto::{CategoryCreateDto, CategoryItemResponse, CategoryUpdateDto, IdParam};
@@ -22,7 +23,7 @@ pub async fn show(
 
 pub async fn add(
     State(state): State<AppState>,
-    Json(payload): Json<CategoryCreateDto>,
+    JsonValidate(payload): JsonValidate<CategoryCreateDto>,
 ) -> Result<Json<CategoryItemResponse>, AppError> {
     let new_category = CategoryService::create(&state.db, payload).await?;
     Ok(Json(new_category))
@@ -31,7 +32,7 @@ pub async fn add(
 pub async fn update(
     State(state): State<AppState>,
     Path(id): Path<IdParam>,
-    Json(payload): Json<CategoryUpdateDto>,
+    JsonValidate(payload): JsonValidate<CategoryUpdateDto>,
 ) -> Result<Json<CategoryItemResponse>, AppError> {
     let updated_category = CategoryService::update(&state.db, id.0, payload).await?;
 

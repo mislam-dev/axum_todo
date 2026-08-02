@@ -1,13 +1,15 @@
 use sea_orm::prelude::Uuid;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 // Request DTOs
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Validate)]
 pub struct CategoryCreateDto {
+    #[validate(length(min = 1, message = "This field is requried!"))]
     pub name: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Validate)]
 pub struct CategoryUpdateDto {
     pub name: Option<String>,
 }

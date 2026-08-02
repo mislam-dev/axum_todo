@@ -6,11 +6,15 @@ use validator::Validate;
 #[derive(Deserialize, Debug, Validate)]
 pub struct UserCreateDto {
     pub name: String,
+
+    #[validate(email(message = "Please provide a valid email address"))]
     pub email: String,
+
+    #[validate(length(min = 8, message = "Password must be at least 8 characters long"))]
     pub password: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct UserUpdateDto {
     pub name: Option<String>,
 }
@@ -33,4 +37,11 @@ pub struct UserItemResponse {
     pub id: Uuid,
     pub name: String,
     pub email: String,
+}
+#[derive(Serialize)]
+pub struct UserItemWithPassword {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String,
+    pub password: String,
 }

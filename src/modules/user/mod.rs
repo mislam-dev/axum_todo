@@ -6,4 +6,4 @@ mod model;
 pub mod password;
 mod repository;
 pub mod router;
-mod service;
+pub mod service;

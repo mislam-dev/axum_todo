@@ -1,5 +1,6 @@
 use crate::app::AppState;
 use crate::core::errors::error::AppError;
+use crate::core::validation::validation::JsonValidate;
 use crate::modules::auth::jwt::Claims;
 use crate::modules::todo::dto::{IdParam, TodoCreateDto, TodoItemResponse, TodoUpdateDto};
 use crate::modules::todo::service::TodosService;
@@ -26,7 +27,7 @@ pub async fn show(
 pub async fn add(
     claims: Claims,
     State(state): State<AppState>,
-    Json(payload): Json<TodoCreateDto>,
+    JsonValidate(payload): JsonValidate<TodoCreateDto>,
 ) -> Result<Json<TodoItemResponse>, AppError> {
     let todo = TodosService::create(&state.db, claims.sub, payload).await?;
     Ok(Json(todo))
@@ -36,7 +37,7 @@ pub async fn update(
     claims: Claims,
     State(state): State<AppState>,
     Path(id): Path<IdParam>,
-    Json(payload): Json<TodoUpdateDto>,
+    JsonValidate(payload): JsonValidate<TodoUpdateDto>,
 ) -> Result<Json<TodoItemResponse>, AppError> {
     let update_todo = TodosService::update(&state.db, id.0, claims.sub, payload).await?;
 

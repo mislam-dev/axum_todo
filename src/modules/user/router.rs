@@ -1,11 +1,8 @@
+use super::controller::{add, list, remove, show, update};
+use crate::{app::AppState, modules::auth::jwt::Claims};
 use axum::{
-    Router,
+    Router, middleware,
     routing::{delete, get, patch, post},
-};
-
-use crate::{
-    app::AppState,
-    modules::user::controller::{add, list, remove, show, update},
 };
 
 pub fn user_router() -> Router<AppState> {
@@ -15,4 +12,5 @@ pub fn user_router() -> Router<AppState> {
         .route("/", post(add))
         .route("/{id}", patch(update))
         .route("/{id}", delete(remove))
+        .route_layer(middleware::from_extractor::<Claims>())
 }
