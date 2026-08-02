@@ -1,6 +1,6 @@
 use super::dto::{CategoryCreateDto, CategoryItemResponse, CategoryUpdateDto};
 use super::repository::CategoryRepository;
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
@@ -47,11 +47,11 @@ impl CategoryService {
         id: Uuid,
         dto: CategoryUpdateDto,
     ) -> Result<CategoryItemResponse, AppError> {
-        let user = CategoryRepository::update(db, id, dto).await?;
+        let category = CategoryRepository::update(db, id, dto).await?;
 
         Ok(CategoryItemResponse {
-            id: user.id,
-            name: user.name,
+            id: category.id,
+            name: category.name,
         })
     }
     pub async fn remove(db: &DatabaseConnection, id: Uuid) -> Result<(), AppError> {

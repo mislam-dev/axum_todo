@@ -1,23 +1,18 @@
 use super::dto::{IdParam, UserCreateDto, UserItemResponse, UserUpdateDto};
 use super::service::UserService;
-use crate::core::validation::validation::JsonValidate;
-use crate::modules::auth::jwt::Claims;
+use crate::core::validation::JsonValidate;
 use crate::{app::AppState, core::errors::error::AppError};
 use axum::{
     Json,
     extract::{Path, State},
 };
 
-pub async fn list(
-    _claims: Claims,
-    State(state): State<AppState>,
-) -> Result<Json<Vec<UserItemResponse>>, AppError> {
+pub async fn list(State(state): State<AppState>) -> Result<Json<Vec<UserItemResponse>>, AppError> {
     let users = UserService::find(&state.db).await?;
     Ok(Json(users))
 }
 
 pub async fn show(
-    _claims: Claims,
     State(state): State<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<Json<UserItemResponse>, AppError> {
@@ -26,7 +21,6 @@ pub async fn show(
 }
 
 pub async fn add(
-    _claims: Claims,
     State(state): State<AppState>,
     JsonValidate(payload): JsonValidate<UserCreateDto>,
 ) -> Result<Json<UserItemResponse>, AppError> {
@@ -35,7 +29,6 @@ pub async fn add(
 }
 
 pub async fn update(
-    _claims: Claims,
     State(state): State<AppState>,
     Path(id): Path<IdParam>,
     JsonValidate(payload): JsonValidate<UserUpdateDto>,
@@ -45,7 +38,6 @@ pub async fn update(
 }
 
 pub async fn remove(
-    _claims: Claims,
     State(state): State<AppState>,
     Path(id): Path<IdParam>,
 ) -> Result<(), AppError> {

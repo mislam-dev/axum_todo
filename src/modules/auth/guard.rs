@@ -1,4 +1,4 @@
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 
 use super::jwt::{Claims, verify_jwt};
 use axum::http::header::AUTHORIZATION;
@@ -15,11 +15,15 @@ where
             .headers
             .get(AUTHORIZATION)
             .and_then(|value| value.to_str().ok())
-            .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
+            .ok_or(AppError::Unauthorized(
+                "Missing Authorization header".to_string(),
+            ))?;
 
         let token = auth_header
             .strip_prefix("Bearer ")
-            .ok_or(AppError::Unauthorized("Unauthorized".to_string()))?;
+            .ok_or(AppError::Unauthorized(
+                "Invalid Authorization header format".to_string(),
+            ))?;
 
         verify_jwt(token).map_err(|_| AppError::Unauthorized("Unauthorized".to_string()))
     }

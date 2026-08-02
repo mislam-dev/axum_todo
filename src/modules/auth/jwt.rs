@@ -1,9 +1,9 @@
+use chrono::{Duration, Utc};
 use jsonwebtoken::Header;
-use migration::prelude::chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
@@ -13,12 +13,12 @@ pub struct Claims {
     pub email: String,
 }
 
-pub struct JwtPaylaod {
+pub struct JwtPayload {
     pub sub: Uuid,
     pub email: String,
 }
 
-pub fn create_jwt(data: JwtPaylaod) -> Result<String, AppError> {
+pub fn create_jwt(data: JwtPayload) -> Result<String, AppError> {
     let secret = std::env::var("JWT_SECRET")
         .map_err(|_| AppError::Config("JWT_SECRET must be set in .env".to_string()))?;
 
@@ -48,7 +48,7 @@ pub fn verify_jwt(token: &str) -> Result<Claims, AppError> {
         &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
         &jsonwebtoken::Validation::default(),
     )
-    .map_err(|err| AppError::Config(format!("JWT encoding failed: {}", err)))?;
+    .map_err(|err| AppError::Config(format!("JWT decoding failed: {}", err)))?;
 
     Ok(token_data.claims)
 }

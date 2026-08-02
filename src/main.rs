@@ -3,7 +3,10 @@ mod core;
 mod database;
 mod modules;
 
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::{
+    env,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+};
 
 use app::app;
 use dotenvy::dotenv;
@@ -13,7 +16,7 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     tracing_subscriber::registry()
         .with(
@@ -25,20 +28,31 @@ async fn main() {
         .init();
 
     tracing::info!("Starting up the application...");
-    let app = app().await;
 
-    let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-    let addr = SocketAddr::new(ip, 3000);
+    // TODO: remove unwrap later
+    let app = app().await.unwrap();
 
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let host: IpAddr = env::var("HOST")
+        .unwrap_or_else(|_| "127.0.0.1".to_string())
+        .parse()
+        .unwrap_or(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
+    let port: u16 = env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .unwrap_or(3000);
+
+    let addr = SocketAddr::new(host, port);
+
+    let listener = tokio::net::TcpListener::bind(addr).await?;
 
     let local_addr = listener.local_addr().unwrap();
     tracing::info!("Listening on {}", local_addr);
 
     let _ = axum::serve(listener, app.layer(TraceLayer::new_for_http()))
         .with_graceful_shutdown(shutdown_signal())
-        .await
-        .ok();
+        .await?;
+
+    Ok(())
 }
 
 async fn shutdown_signal() {

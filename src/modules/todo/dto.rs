@@ -12,16 +12,9 @@ pub struct TodoCreateDto {
 
 #[derive(Deserialize, Debug, Validate)]
 pub struct TodoUpdateDto {
+    #[validate(length(min = 1, message = "title is required!"))]
     pub title: Option<String>,
     pub completed: Option<bool>,
-}
-
-#[derive(Deserialize)]
-#[allow(dead_code)]
-pub struct TodoListQuery {
-    pub page: Option<u32>,
-    pub limit: Option<u32>,
-    pub search: Option<String>,
 }
 
 #[derive(Deserialize)]

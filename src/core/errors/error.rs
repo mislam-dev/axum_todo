@@ -27,7 +27,6 @@ pub enum AppError {
     BadRequest(String),
 
     #[error("Internal Server Error: {0}")]
-    #[allow(dead_code)]
     InternalServerError(String),
 }
 
@@ -35,14 +34,14 @@ impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
         match self {
             AppError::Database(err) => {
-                tracing::error!("Datbase error: {:?}", err);
+                tracing::error!(error = %err, "Database error");
                 let body = Json(json!({
-                  "error": "An internal server erorr occured".to_string()
+                  "error": "An internal server erorr occurred".to_string()
                 }));
                 (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
             }
             AppError::Uuid(err) => {
-                tracing::error!("Invalid UUID error: {:?}", err);
+                tracing::warn!(error = %err, "Invalid UUID in request");
 
                 let body = Json(json!({
                   "error":format!("Invalid ID format: {}", err),
@@ -51,7 +50,7 @@ impl IntoResponse for AppError {
                 (StatusCode::BAD_REQUEST, body).into_response()
             }
             AppError::Config(msg) => {
-                tracing::error!("Invalid UUID error: {:?}", msg);
+                tracing::error!(message = %msg, "Configuration error");
 
                 let body = Json(json!({
                   "error":"An internal server error occurred",
@@ -81,12 +80,12 @@ impl IntoResponse for AppError {
                     "error": "Validation failed",
                     "details": err_map // e.g., { "email": ["Invalid email format"], "password": ["Too short"] }
                 }));
-                tracing::error!("Validation failed: {}", body.to_string());
+                tracing::warn!(details = ?err_map, "Request validation failed");
                 (StatusCode::BAD_REQUEST, body).into_response()
             }
 
             AppError::Unauthorized(msg) => {
-                tracing::error!("Unauthorized: {}", msg);
+                tracing::warn!(message = %msg, "Unauthorized request");
                 let body = Json(json!({
                   "error": msg,
                 }));
@@ -94,7 +93,7 @@ impl IntoResponse for AppError {
                 (StatusCode::UNAUTHORIZED, body).into_response()
             }
             AppError::NotFound(msg) => {
-                tracing::error!("NotFound: {}", msg);
+                tracing::warn!(message = %msg, "Resource not found");
                 let body = Json(json!({
                   "error": msg,
                 }));
@@ -102,7 +101,7 @@ impl IntoResponse for AppError {
                 (StatusCode::NOT_FOUND, body).into_response()
             }
             AppError::BadRequest(msg) => {
-                tracing::error!("BadRequest: {}", msg);
+                tracing::warn!(message = %msg, "Bad request");
                 let body = Json(json!({
                   "error": msg,
                 }));
@@ -110,7 +109,7 @@ impl IntoResponse for AppError {
                 (StatusCode::BAD_REQUEST, body).into_response()
             }
             AppError::InternalServerError(msg) => {
-                tracing::error!("InternalServerError: {}", msg);
+                tracing::error!(message = %msg, "Internal server error");
                 let body = Json(json!({
                   "error": "An internal server error occurred",
                 }));

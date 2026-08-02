@@ -1,11 +1,14 @@
 use axum::{
-    Router,
+    Router, middleware,
     routing::{delete, get, patch, post},
 };
 
 use crate::{
     app::AppState,
-    modules::category::controller::{add, list, remove, show, update},
+    modules::{
+        auth::jwt::Claims,
+        category::controller::{add, list, remove, show, update},
+    },
 };
 
 pub fn category_router() -> Router<AppState> {
@@ -15,4 +18,5 @@ pub fn category_router() -> Router<AppState> {
         .route("/", post(add))
         .route("/{id}", patch(update))
         .route("/{id}", delete(remove))
+        .route_layer(middleware::from_extractor::<Claims>())
 }

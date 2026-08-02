@@ -1,4 +1,4 @@
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 use bcrypt::{DEFAULT_COST, hash, verify};
 
 pub async fn hash_password(password: &str) -> Result<String, AppError> {
@@ -10,7 +10,7 @@ pub async fn hash_password(password: &str) -> Result<String, AppError> {
     .await
     .map_err(|_| AppError::InternalServerError("Failed to execute background task".to_string()))?
 }
-pub async fn verify_passwrod(hash: &str, password: &str) -> Result<bool, AppError> {
+pub async fn verify_password(hash: &str, password: &str) -> Result<bool, AppError> {
     let has_owned = hash.to_owned();
     let password_owned = password.to_owned();
     tokio::task::spawn_blocking(move || {

@@ -5,6 +5,7 @@ use validator::Validate;
 // Request DTOs
 #[derive(Deserialize, Debug, Validate)]
 pub struct UserCreateDto {
+    #[validate(length(min = 1, message = "Name is required!"))]
     pub name: String,
 
     #[validate(email(message = "Please provide a valid email address"))]
@@ -16,6 +17,7 @@ pub struct UserCreateDto {
 
 #[derive(Deserialize, Validate)]
 pub struct UserUpdateDto {
+    #[validate(length(min = 1, message = "Name is required!"))]
     pub name: Option<String>,
 }
 

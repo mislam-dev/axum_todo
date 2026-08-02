@@ -6,11 +6,13 @@ use crate::{
     },
 };
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, Condition, DeleteResult, EntityTrait, QueryFilter,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DeleteResult, EntityTrait,
+    QueryFilter,
 };
 
 use super::entities::users::{
-    ActiveModel as UsersActiveModel, Entity as UsersEntity, Model as UserModel,
+    ActiveModel as UsersActiveModel, Column as UserColumn, Entity as UsersEntity,
+    Model as UserModel,
 };
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
@@ -74,10 +76,11 @@ impl UserRepository {
             .map_err(AppError::Database)
     }
 
-    pub async fn find_one(
+    pub async fn find_by_email_with_password(
         db: &DatabaseConnection,
-        filter: Condition,
+        email: &String,
     ) -> Result<Option<UserModel>, AppError> {
+        let filter = Condition::all().add(UserColumn::Email.eq(email));
         UsersEntity::find()
             .filter(filter)
             .one(db)

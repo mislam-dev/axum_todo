@@ -1,4 +1,4 @@
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, DeleteResult, EntityTrait};
 
 use super::dto::{CategoryCreateDto, CategoryUpdateDto};

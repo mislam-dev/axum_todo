@@ -1,4 +1,4 @@
-use crate::core::validation::validation::JsonValidate;
+use crate::core::validation::JsonValidate;
 use crate::{app::AppState, core::errors::error::AppError};
 
 use super::dto::{CategoryCreateDto, CategoryItemResponse, CategoryUpdateDto, IdParam};

@@ -10,8 +10,8 @@ pub struct LoginUserDto {
     pub password: String,
 }
 // Response DTOs
-#[derive(Serialize, Debug, Validate)]
+#[derive(Serialize, Debug)]
 pub struct LoginResponse {
-    pub acess_token: String,
+    pub access_token: String,
     pub refresh_token: String,
 }

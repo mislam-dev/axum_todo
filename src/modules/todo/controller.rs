@@ -1,6 +1,6 @@
 use crate::app::AppState;
-use crate::core::errors::error::AppError;
-use crate::core::validation::validation::JsonValidate;
+use crate::core::errors::AppError;
+use crate::core::validation::JsonValidate;
 use crate::modules::auth::jwt::Claims;
 use crate::modules::todo::dto::{IdParam, TodoCreateDto, TodoItemResponse, TodoUpdateDto};
 use crate::modules::todo::service::TodosService;

@@ -1,9 +1,8 @@
 use super::dto::{TodoCreateDto, TodoUpdateDto};
-use super::entities::todos::Column as TodosColumn;
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 use crate::modules::todo::dto::TodoItemResponse;
 use crate::modules::todo::repository::TodosRepository;
-use sea_orm::{ColumnTrait, Condition, DatabaseConnection};
+use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
 pub struct TodosService;
@@ -13,8 +12,7 @@ impl TodosService {
         db: &DatabaseConnection,
         user_id: Uuid,
     ) -> Result<Vec<TodoItemResponse>, AppError> {
-        let condition = Condition::all().add(TodosColumn::UserId.eq(user_id));
-        let todos = TodosRepository::find(db, Some(condition)).await?;
+        let todos = TodosRepository::find(db, user_id).await?;
         let todos = todos
             .into_iter()
             .map(|item| TodoItemResponse {
@@ -33,8 +31,7 @@ impl TodosService {
         user_id: Uuid,
         id: i32,
     ) -> Result<TodoItemResponse, AppError> {
-        let condition = Condition::all().add(TodosColumn::UserId.eq(user_id));
-        let item = TodosRepository::find_one(db, id, Some(condition))
+        let item = TodosRepository::find_one(db, id, user_id)
             .await?
             .ok_or(AppError::NotFound("Todo not found!".to_string()))?;
 
@@ -70,8 +67,7 @@ impl TodosService {
         user_id: Uuid,
         dto: TodoUpdateDto,
     ) -> Result<TodoItemResponse, AppError> {
-        let condition = Condition::all().add(TodosColumn::UserId.eq(user_id));
-        let todo = TodosRepository::update(db, id, dto, Some(condition)).await?;
+        let todo = TodosRepository::update(db, id, user_id, dto).await?;
         let todo = TodoItemResponse {
             id: todo.id,
             title: todo.title,

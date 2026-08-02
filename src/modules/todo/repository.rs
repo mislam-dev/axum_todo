@@ -1,4 +1,4 @@
-use crate::core::errors::error::AppError;
+use crate::core::errors::AppError;
 
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, DeleteResult, EntityTrait};
 
@@ -13,27 +13,20 @@ use uuid::Uuid;
 pub struct TodosRepository;
 
 impl TodosRepository {
-    pub async fn find(
-        db: &DatabaseConnection,
-        filter: Option<Condition>,
-    ) -> Result<Vec<TodosModel>, AppError> {
-        let mut query = TodosEntity::find();
-        if let Some(condition) = filter {
-            query = query.filter(condition)
-        }
+    pub async fn find(db: &DatabaseConnection, user_id: Uuid) -> Result<Vec<TodosModel>, AppError> {
+        let condition = Condition::all().add(TodosColumn::UserId.eq(user_id));
+        let query = TodosEntity::find().filter(condition);
+
         query.all(db).await.map_err(AppError::Database)
     }
 
     pub async fn find_one(
         db: &DatabaseConnection,
         id: i32,
-        filter: Option<Condition>,
+        user_id: Uuid,
     ) -> Result<Option<TodosModel>, AppError> {
-        let mut query = TodosEntity::find_by_id(id);
-
-        if let Some(condition) = filter {
-            query = query.filter(condition)
-        }
+        let condition = Condition::all().add(TodosColumn::UserId.eq(user_id));
+        let query = TodosEntity::find_by_id(id).filter(condition);
 
         query.one(db).await.map_err(AppError::Database)
     }
@@ -58,12 +51,12 @@ impl TodosRepository {
     pub async fn update(
         db: &DatabaseConnection,
         id: i32,
+        user_id: Uuid,
         dto: TodoUpdateDto,
-        filter: Option<Condition>,
     ) -> Result<TodosModel, AppError> {
-        let existing_todo = Self::find_one(db, id, filter)
+        let existing_todo = Self::find_one(db, id, user_id)
             .await?
-            .ok_or(AppError::NotFound("User not found!".to_string()))?;
+            .ok_or(AppError::NotFound("Todo not found!".to_string()))?;
 
         let mut active_todo: TodosActiveModel = existing_todo.into();
 

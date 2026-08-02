@@ -1,5 +1,5 @@
-use crate::core::errors::error::AppError;
-use crate::core::validation::validation::JsonValidate;
+use crate::core::errors::AppError;
+use crate::core::validation::JsonValidate;
 use crate::modules::auth::service::AuthService;
 use crate::modules::user::dto::UserCreateDto;
 use crate::{

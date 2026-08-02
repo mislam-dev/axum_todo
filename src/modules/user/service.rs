@@ -1,10 +1,9 @@
-use super::entities::users::Column as UserColumn;
 use super::{
     dto::{UserCreateDto, UserItemResponse, UserItemWithPassword, UserUpdateDto},
     repository::UserRepository,
 };
-use crate::core::errors::error::AppError;
-use sea_orm::{ColumnTrait, Condition, DatabaseConnection};
+use crate::core::errors::AppError;
+use sea_orm::DatabaseConnection;
 
 use uuid::Uuid;
 
@@ -69,8 +68,7 @@ impl UserService {
         db: &DatabaseConnection,
         email: &String,
     ) -> Result<UserItemWithPassword, AppError> {
-        let filter = Condition::all().add(UserColumn::Email.eq(email));
-        let user = UserRepository::find_one(db, filter).await?;
+        let user = UserRepository::find_by_email_with_password(db, email).await?;
         let user = user.ok_or(AppError::NotFound("User not found".to_string()))?;
         Ok(UserItemWithPassword {
             id: user.id,
